@@ -21,11 +21,12 @@
 package org.amcworld.springcrm.launcher
 
 import static javax.swing.SwingConstants.*
-import javax.swing.JMenuItem;
 import groovy.swing.SwingBuilder
 import java.awt.BorderLayout as BL
+import java.awt.Desktop
 import javax.swing.JButton
 import javax.swing.JFrame
+import javax.swing.JMenuItem
 import javax.swing.JTextArea
 
 
@@ -62,31 +63,37 @@ class Launcher {
     //-- Public methods -------------------------
 
     def generateWindow = {
-        window = frame(title: 'SpringCRM', show: true,
+        window = frame(title: rb.getString('title'), show: true,
                        defaultCloseOperation: JFrame.DISPOSE_ON_CLOSE) {
             menuBar {
-                menu text: 'Datei', {
+                menu(text: rb.getString('menu.file.label'),
+                     mnemonic: rb.getString('menu.file.mnemonic')) {
                     menuItemStart = menuItem(
-                        text: 'SpringCRM starten',
+                        text: rb.getString('menu.file.start.label'),
+                        mnemonic: rb.getString('menu.file.start.mnemonic'),
                         icon: imageIcon('res/image/menu-start.png'),
                         enabled: !tomcatRunning,
                         actionPerformed: { startTomcat() }
                     )
                     menuItemStop = menuItem(
-                        text: 'SpringCRM beenden',
+                        text: rb.getString('menu.file.stop.label'),
+                        mnemonic: rb.getString('menu.file.stop.mnemonic'),
                         icon: imageIcon('res/image/menu-stop.png'),
                         enabled: tomcatRunning,
                         actionPerformed: { stopTomcat() }
                     )
                     separator()
                     menuItemLaunch = menuItem(
-                        text: 'SpringCRM aufrufen',
+                        text: rb.getString('menu.file.launch.label'),
+                        mnemonic: rb.getString('menu.file.launch.mnemonic'),
                         icon: imageIcon('res/image/menu-springcrm.png'),
-                        enabled: tomcatRunning
+                        enabled: tomcatRunning,
+                        actionPerformed: { launchSpringcrm() }
                     )
                     separator()
                     menuItem(
-                        text: 'Beenden',
+                        text: rb.getString('menu.file.quit.label'),
+                        mnemonic: rb.getString('menu.file.quit.mnemonic'),
                         icon: imageIcon('res/image/menu-quit.png'),
                         actionPerformed: { dispose() }
                     )
@@ -102,12 +109,24 @@ class Launcher {
                         actionPerformed: { changeLanguage Locale.ENGLISH }
                     )
                 }
-                menu text: '?', {
-                    menuItem(text: 'Über SpringCRM')
+                menu(text: rb.getString('menu.info.label'),
+                     mnemonic: rb.getString('menu.info.mnemonic')) {
+                    menuItem(
+                        text: rb.getString('menu.info.website.label'),
+                        mnemonic: rb.getString('menu.info.website.mnemonic'),
+                        icon: imageIcon('res/image/menu-website.png'),
+                        actionPerformed: { browseTo 'http://www.springcrm.de' }
+                    )
+                    separator()
+                    menuItem(
+                        text: rb.getString('menu.info.about.label'),
+                        mnemonic: rb.getString('menu.info.about.mnemonic'),
+                        icon: imageIcon('res/image/menu-about.png')
+                    )
                 }
             }
             borderLayout()
-            outputArea = textArea rows: 10, constraints: BL.NORTH
+            outputArea = textArea columns: 60, rows: 10, constraints: BL.NORTH
             panel {
                 flowLayout()
                 btnStart = button(
@@ -120,11 +139,13 @@ class Launcher {
                     actionPerformed: { startTomcat() }
                 )
                 btnLaunch = button(
-                    text: 'Aufrufen',
+                    text: rb.getString('button.launch.label'),
+                    mnemonic: rb.getString('button.launch.mnemonic'),
                     icon: imageIcon('res/image/springcrm.png'),
                     horizontalTextPosition: CENTER,
                     verticalTextPosition: BOTTOM,
-                    enabled: tomcatRunning
+                    enabled: tomcatRunning,
+                    actionPerformed: { launchSpringcrm() }
                 )
                 btnStop = button(
                     text: rb.getString('button.stop.label'),
@@ -152,7 +173,6 @@ class Launcher {
         def builder = new SwingBuilder()
         generateWindow.delegate = builder
         builder.edt generateWindow
-        outputArea.text = 'Hallo Welt!'
     }
 
 
@@ -188,6 +208,21 @@ class Launcher {
     }
 
     /**
+     * Opens a browser and displays the given URL.
+     *
+     * @param url   the URL to display
+     */
+    protected void browseTo(String url) {
+        def desktop = Desktop.desktop
+        if (!desktop.isSupported(Desktop.Action.BROWSE)) {
+            outputArea.append rb.getString('error.cannotLaunchBrowser')
+            return
+        }
+
+        desktop.browse new URI(url)
+    }
+
+    /**
      * Initializes the resource bundle for the given locale.
      *
      * @param locale    the given locale
@@ -201,9 +236,17 @@ class Launcher {
     }
 
     /**
+     * Starts a browser and displays the SpringCRM webpage.
+     */
+    protected void launchSpringcrm() {
+        browseTo 'http://localhost:8080/'
+    }
+
+    /**
      * Starts Tomcat.
      */
     protected void startTomcat() {
+        outputArea.text = rb.getString('status.tomcatStarting')
         tomcatRunning = true
         enableControls()
     }
@@ -212,6 +255,7 @@ class Launcher {
      * Stops Tomcat.
      */
     protected void stopTomcat() {
+        outputArea.append rb.getString('status.tomcatStopping')
         tomcatRunning = false
         enableControls()
     }
