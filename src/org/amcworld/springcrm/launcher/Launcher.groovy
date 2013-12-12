@@ -27,6 +27,7 @@ import java.awt.Desktop
 import javax.swing.JButton
 import javax.swing.JFrame
 import javax.swing.JMenuItem
+import javax.swing.JOptionPane
 import javax.swing.JTextArea
 
 
@@ -121,7 +122,8 @@ class Launcher {
                     menuItem(
                         text: rb.getString('menu.info.about.label'),
                         mnemonic: rb.getString('menu.info.about.mnemonic'),
-                        icon: imageIcon('res/image/menu-about.png')
+                        icon: imageIcon('res/image/menu-about.png'),
+                        actionPerformed: { showAboutDlg() }
                     )
                 }
             }
@@ -240,6 +242,13 @@ class Launcher {
      */
     protected void launchSpringcrm() {
         browseTo 'http://localhost:8080/'
+    }
+
+    /**
+     * Displays the about dialog.
+     */
+    protected void showAboutDlg() {
+        JOptionPane.showMessageDialog window, rb.getString('about.message')
     }
 
     /**
