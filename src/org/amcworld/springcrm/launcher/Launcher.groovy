@@ -21,14 +21,17 @@
 package org.amcworld.springcrm.launcher
 
 import static javax.swing.SwingConstants.*
+import javax.swing.JMenuItem;
 import groovy.swing.SwingBuilder
 import java.awt.BorderLayout as BL
+import javax.swing.JButton
 import javax.swing.JFrame
 import javax.swing.JTextArea
 
 
 /**
- * The class {@code Launcher} represents ...
+ * The class {@code Launcher} represents a GUI launcher of Tomcat and
+ * SpringCRM.
  *
  * @author  Daniel Ellermann
  * @version 1.0
@@ -37,8 +40,15 @@ class Launcher {
 
     //-- Instance variables ---------------------
 
+    JButton btnLaunch
+    JButton btnStart
+    JButton btnStop
+    JMenuItem menuItemLaunch
+    JMenuItem menuItemStart
+    JMenuItem menuItemStop
     JTextArea outputArea
     ResourceBundle rb
+    boolean tomcatRunning
     JFrame window
 
 
@@ -56,18 +66,23 @@ class Launcher {
                        defaultCloseOperation: JFrame.DISPOSE_ON_CLOSE) {
             menuBar {
                 menu text: 'Datei', {
-                    menuItem(
+                    menuItemStart = menuItem(
                         text: 'SpringCRM starten',
-                        icon: imageIcon('res/image/menu-start.png')
+                        icon: imageIcon('res/image/menu-start.png'),
+                        enabled: !tomcatRunning,
+                        actionPerformed: { startTomcat() }
                     )
-                    menuItem(
+                    menuItemStop = menuItem(
                         text: 'SpringCRM beenden',
-                        icon: imageIcon('res/image/menu-stop.png')
+                        icon: imageIcon('res/image/menu-stop.png'),
+                        enabled: tomcatRunning,
+                        actionPerformed: { stopTomcat() }
                     )
                     separator()
-                    menuItem(
+                    menuItemLaunch = menuItem(
                         text: 'SpringCRM aufrufen',
-                        icon: imageIcon('res/image/menu-springcrm.png')
+                        icon: imageIcon('res/image/menu-springcrm.png'),
+                        enabled: tomcatRunning
                     )
                     separator()
                     menuItem(
@@ -95,27 +110,30 @@ class Launcher {
             outputArea = textArea rows: 10, constraints: BL.NORTH
             panel {
                 flowLayout()
-                button(
+                btnStart = button(
                     text: rb.getString('button.start.label'),
                     mnemonic: rb.getString('button.start.mnemonic'),
                     icon: imageIcon('res/image/start.png'),
                     horizontalTextPosition: CENTER,
-                    verticalTextPosition: BOTTOM
+                    verticalTextPosition: BOTTOM,
+                    enabled: !tomcatRunning,
+                    actionPerformed: { startTomcat() }
                 )
-                button(
+                btnLaunch = button(
                     text: 'Aufrufen',
                     icon: imageIcon('res/image/springcrm.png'),
                     horizontalTextPosition: CENTER,
                     verticalTextPosition: BOTTOM,
-                    enabled: false
+                    enabled: tomcatRunning
                 )
-                button(
+                btnStop = button(
                     text: rb.getString('button.stop.label'),
                     mnemonic: rb.getString('button.stop.mnemonic'),
                     icon: imageIcon('res/image/stop.png'),
                     horizontalTextPosition: CENTER,
                     verticalTextPosition: BOTTOM,
-                    enabled: false
+                    enabled: tomcatRunning,
+                    actionPerformed: { stopTomcat() }
                 )
             }
         }
@@ -127,6 +145,9 @@ class Launcher {
         launcher.run()
     }
 
+    /**
+     * Constructs the window and displays it.
+     */
     void run() {
         def builder = new SwingBuilder()
         generateWindow.delegate = builder
@@ -154,6 +175,19 @@ class Launcher {
     }
 
     /**
+     * Enables or disables the controls in the window depending on the running
+     * status of Tomcat.
+     */
+    protected void enableControls() {
+        btnStart.enabled = !tomcatRunning
+        btnLaunch.enabled = tomcatRunning
+        btnStop.enabled = tomcatRunning
+        menuItemStart.enabled = !tomcatRunning
+        menuItemLaunch.enabled = tomcatRunning
+        menuItemStop.enabled = tomcatRunning
+    }
+
+    /**
      * Initializes the resource bundle for the given locale.
      *
      * @param locale    the given locale
@@ -164,5 +198,21 @@ class Launcher {
             'org.amcworld.springcrm.launcher.messages', locale
         )
         rb
+    }
+
+    /**
+     * Starts Tomcat.
+     */
+    protected void startTomcat() {
+        tomcatRunning = true
+        enableControls()
+    }
+
+    /**
+     * Stops Tomcat.
+     */
+    protected void stopTomcat() {
+        tomcatRunning = false
+        enableControls()
     }
 }
