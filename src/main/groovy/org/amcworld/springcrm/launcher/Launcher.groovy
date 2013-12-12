@@ -72,14 +72,14 @@ class Launcher {
                     menuItemStart = menuItem(
                         text: rb.getString('menu.file.start.label'),
                         mnemonic: rb.getString('menu.file.start.mnemonic'),
-                        icon: imageIcon('res/image/menu-start.png'),
+                        icon: imageIcon(resource: '/image/menu-start.png'),
                         enabled: !tomcatRunning,
                         actionPerformed: { startTomcat() }
                     )
                     menuItemStop = menuItem(
                         text: rb.getString('menu.file.stop.label'),
                         mnemonic: rb.getString('menu.file.stop.mnemonic'),
-                        icon: imageIcon('res/image/menu-stop.png'),
+                        icon: imageIcon(resource: '/image/menu-stop.png'),
                         enabled: tomcatRunning,
                         actionPerformed: { stopTomcat() }
                     )
@@ -87,7 +87,7 @@ class Launcher {
                     menuItemLaunch = menuItem(
                         text: rb.getString('menu.file.launch.label'),
                         mnemonic: rb.getString('menu.file.launch.mnemonic'),
-                        icon: imageIcon('res/image/menu-springcrm.png'),
+                        icon: imageIcon(resource: '/image/menu-springcrm.png'),
                         enabled: tomcatRunning,
                         actionPerformed: { launchSpringcrm() }
                     )
@@ -95,7 +95,7 @@ class Launcher {
                     menuItem(
                         text: rb.getString('menu.file.quit.label'),
                         mnemonic: rb.getString('menu.file.quit.mnemonic'),
-                        icon: imageIcon('res/image/menu-quit.png'),
+                        icon: imageIcon(resource: '/image/menu-quit.png'),
                         actionPerformed: { dispose() }
                     )
                 }
@@ -115,14 +115,14 @@ class Launcher {
                     menuItem(
                         text: rb.getString('menu.info.website.label'),
                         mnemonic: rb.getString('menu.info.website.mnemonic'),
-                        icon: imageIcon('res/image/menu-website.png'),
+                        icon: imageIcon(resource: '/image/menu-website.png'),
                         actionPerformed: { browseTo 'http://www.springcrm.de' }
                     )
                     separator()
                     menuItem(
                         text: rb.getString('menu.info.about.label'),
                         mnemonic: rb.getString('menu.info.about.mnemonic'),
-                        icon: imageIcon('res/image/menu-about.png'),
+                        icon: imageIcon(resource: '/image/menu-about.png'),
                         actionPerformed: { showAboutDlg() }
                     )
                 }
@@ -134,7 +134,7 @@ class Launcher {
                 btnStart = button(
                     text: rb.getString('button.start.label'),
                     mnemonic: rb.getString('button.start.mnemonic'),
-                    icon: imageIcon('res/image/start.png'),
+                    icon: imageIcon(resource: '/image/start.png'),
                     horizontalTextPosition: CENTER,
                     verticalTextPosition: BOTTOM,
                     enabled: !tomcatRunning,
@@ -143,7 +143,7 @@ class Launcher {
                 btnLaunch = button(
                     text: rb.getString('button.launch.label'),
                     mnemonic: rb.getString('button.launch.mnemonic'),
-                    icon: imageIcon('res/image/springcrm.png'),
+                    icon: imageIcon(resource: '/image/springcrm.png'),
                     horizontalTextPosition: CENTER,
                     verticalTextPosition: BOTTOM,
                     enabled: tomcatRunning,
@@ -152,7 +152,7 @@ class Launcher {
                 btnStop = button(
                     text: rb.getString('button.stop.label'),
                     mnemonic: rb.getString('button.stop.mnemonic'),
-                    icon: imageIcon('res/image/stop.png'),
+                    icon: imageIcon(resource: '/image/stop.png'),
                     horizontalTextPosition: CENTER,
                     verticalTextPosition: BOTTOM,
                     enabled: tomcatRunning,
@@ -232,7 +232,7 @@ class Launcher {
      */
     protected ResourceBundle initResourceBundle(Locale locale) {
         rb = ResourceBundle.getBundle(
-            'org.amcworld.springcrm.launcher.messages', locale
+            'messages', locale
         )
         rb
     }
