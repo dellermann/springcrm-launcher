@@ -31,6 +31,8 @@ import org.apache.catalina.core.StandardServer
 import org.apache.catalina.startup.Tomcat
 import org.apache.catalina.valves.CrawlerSessionManagerValve
 import org.apache.coyote.http11.Http11NioProtocol
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 
 
 /**
@@ -40,6 +42,11 @@ import org.apache.coyote.http11.Http11NioProtocol
  * @version 1.0
  */
 class TomcatLauncher {
+
+    //-- Class variables ------------------------
+
+    private static Logger log = LogManager.getLogger(this.class)
+
 
     //-- Instance variables ---------------------
 
@@ -112,7 +119,7 @@ class TomcatLauncher {
     //-- Non-public methods ---------------------
 
     protected void addFailureLifecycleListener() {
-        context.addLifecycleListener { LifecycleEvent event ->
+        context.addLifecycleListener({ LifecycleEvent event ->
             if (event.lifecycle.state == LifecycleState.FAILED) {
                 Server server = tomcat.server
                 if (server instanceof StandardServer) {
@@ -120,7 +127,7 @@ class TomcatLauncher {
                     server.stopAwait()
                 }
             }
-        } as LifecycleListener
+        } as LifecycleListener)
     }
 
     /**
@@ -140,7 +147,7 @@ class TomcatLauncher {
      * Stops the embedded Tomcat server if the application goes down.
      */
     protected void addShutdownHook() {
-        Runtime.runtime.addShutdownHook {
+        Runtime.runtime.addShutdownHook({
             try {
                 if (tomcat) {
                     tomcat.server.stop()
@@ -148,7 +155,7 @@ class TomcatLauncher {
             } catch (LifecycleException e) {
                 output.output 'error.tomcat.cannotStop'
             }
-        } as Thread
+        } as Thread)
     }
 
     /**
@@ -182,7 +189,7 @@ class TomcatLauncher {
             connector.setAttribute 'address', config.host
         }
 
-        connector.uRIEncoding = 'UTF-8'
+        connector.URIEncoding = 'UTF-8'
         context.sessionTimeout = config.sessionTimeout
 
         if (config.httpsPort > 0) {
@@ -203,7 +210,7 @@ class TomcatLauncher {
         sslConnector.secure = true
         sslConnector.port = config.httpsPort
         sslConnector.setProperty "SSLEnabled", "true"
-        sslConnector.uRIEncoding = "UTF-8"
+        sslConnector.URIEncoding = "UTF-8"
 
         sslConnector.setAttribute "keystoreFile", config.keystoreFile.absolutePath
         sslConnector.setAttribute "keystorePass", config.keystorePassword

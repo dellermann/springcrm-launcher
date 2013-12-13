@@ -29,6 +29,8 @@ import javax.swing.JFrame
 import javax.swing.JMenuItem
 import javax.swing.JOptionPane
 import javax.swing.JTextArea
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 
 
 /**
@@ -39,6 +41,11 @@ import javax.swing.JTextArea
  * @version 1.0
  */
 class Launcher {
+
+    //-- Class variables ------------------------
+
+    private static Logger log = LogManager.getLogger(this.class)
+
 
     //-- Instance variables ---------------------
 
@@ -65,6 +72,7 @@ class Launcher {
         initResourceBundle Locale.getDefault()
         output = new GuiOutput(resourceBundle: rb)
         this.extractor = new Extractor(this.args)
+        this.extractor.extract()
         this.tomcatLauncher = new TomcatLauncher(
             args: this.args, extractor: this.extractor, output: this.output
         )
@@ -180,8 +188,6 @@ class Launcher {
         def builder = new SwingBuilder()
         generateWindow.delegate = builder
         builder.edt generateWindow
-
-        extractor.extract()
     }
 
     static main(args) {
@@ -270,7 +276,8 @@ class Launcher {
         enableControls()
         try {
             tomcatLauncher.start()
-        } catch (Exception) {
+        } catch (Exception e) {
+            log.error 'Error loading Tomcat.', e
             output.output 'error.tomcat.starting'
             tomcatRunning = false
             enableControls()
@@ -286,7 +293,8 @@ class Launcher {
         enableControls()
         try {
             tomcatLauncher.stop()
-        } catch (Exception) {
+        } catch (Exception e) {
+            log.error 'Error stopping Tomcat.', e
             output.output 'error.tomcat.stopping'
             tomcatRunning = false
             enableControls()

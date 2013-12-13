@@ -22,6 +22,8 @@ package org.amcworld.springcrm.launcher
 
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 
 
 /**
@@ -32,6 +34,11 @@ import java.util.zip.ZipFile
  * @version 1.0
  */
 class Extractor {
+
+    //-- Class variables ------------------------
+
+    private static Logger log = LogManager.getLogger(this.class)
+
 
     //-- Instance variables ---------------------
 
@@ -56,6 +63,7 @@ class Extractor {
     void extract() {
         destDir = extractWar()
         if (destDir) {
+            log.debug "Extracted WAR file to ${destDir}"
             Runtime.runtime.addShutdownHook { destDir.deleteDir() } as Thread
         }
     }

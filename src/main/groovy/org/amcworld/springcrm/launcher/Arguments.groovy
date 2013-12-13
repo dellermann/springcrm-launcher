@@ -19,9 +19,8 @@
 
 package org.amcworld.springcrm.launcher
 
-import java.io.File;
-import java.util.List;
-import java.util.Map;
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 
 
 /**
@@ -46,6 +45,11 @@ class Arguments {
     ].asImmutable()
 
 
+    //-- Class variables ------------------------
+
+    private static Logger log = LogManager.getLogger(this.class)
+
+
     //-- Instance variables ---------------------
 
     Map<String, String> args = [: ]
@@ -66,7 +70,7 @@ class Arguments {
      * @return  the context path
      */
     String getContextPath() {
-        String path = get('context').trim()
+        String path = get('context', '').trim()
         if (path && !path.startsWith('/')) path = '/' + path
         path
     }
