@@ -42,22 +42,32 @@ class Launcher {
 
     //-- Instance variables ---------------------
 
+    Arguments args
     JButton btnLaunch
     JButton btnStart
     JButton btnStop
+    Extractor extractor
     JMenuItem menuItemLaunch
     JMenuItem menuItemStart
     JMenuItem menuItemStop
+    GuiOutput output
     JTextArea outputArea
     ResourceBundle rb
+    TomcatLauncher tomcatLauncher
     boolean tomcatRunning
     JFrame window
 
 
     //-- Constructors ---------------------------
 
-    Launcher() {
+    Launcher(String [] args) {
+        this.args = new Arguments(args)
         initResourceBundle Locale.getDefault()
+        output = new GuiOutput(resourceBundle: rb)
+        this.extractor = new Extractor(this.args)
+        this.tomcatLauncher = new TomcatLauncher(
+            args: this.args, extractor: this.extractor, output: this.output
+        )
     }
 
 
@@ -128,7 +138,7 @@ class Launcher {
                 }
             }
             borderLayout()
-            outputArea = textArea columns: 60, rows: 10, constraints: BL.NORTH
+            output.outputArea = textArea columns: 60, rows: 10, constraints: BL.NORTH
             panel {
                 flowLayout()
                 btnStart = button(
@@ -163,22 +173,38 @@ class Launcher {
         window.pack()
     }
 
-    static main(args) {
-        def launcher = new Launcher()
-        launcher.run()
-    }
-
     /**
      * Constructs the window and displays it.
      */
-    void run() {
+    void start() {
         def builder = new SwingBuilder()
         generateWindow.delegate = builder
         builder.edt generateWindow
+
+        extractor.extract()
+    }
+
+    static main(args) {
+        new Launcher(args).start()
     }
 
 
     //-- Non-public methods ---------------------
+
+    /**
+     * Opens a browser and displays the given URL.
+     *
+     * @param url   the URL to display
+     */
+    protected void browseTo(String url) {
+        def desktop = Desktop.desktop
+        if (!desktop.isSupported(Desktop.Action.BROWSE)) {
+            output.output 'error.cannotLaunchBrowser'
+            return
+        }
+
+        desktop.browse new URI(url)
+    }
 
     /**
      * Called if the user has changed the language.  The method reloads the
@@ -188,7 +214,7 @@ class Launcher {
      */
     protected void changeLanguage(Locale locale) {
         Locale.setDefault(locale)
-        initResourceBundle locale
+        output.resourceBundle = initResourceBundle(locale)
 
         window.dispose()
         def builder = new SwingBuilder()
@@ -210,30 +236,13 @@ class Launcher {
     }
 
     /**
-     * Opens a browser and displays the given URL.
-     *
-     * @param url   the URL to display
-     */
-    protected void browseTo(String url) {
-        def desktop = Desktop.desktop
-        if (!desktop.isSupported(Desktop.Action.BROWSE)) {
-            outputArea.append rb.getString('error.cannotLaunchBrowser')
-            return
-        }
-
-        desktop.browse new URI(url)
-    }
-
-    /**
      * Initializes the resource bundle for the given locale.
      *
      * @param locale    the given locale
      * @return          the resource bundle
      */
     protected ResourceBundle initResourceBundle(Locale locale) {
-        rb = ResourceBundle.getBundle(
-            'messages', locale
-        )
+        rb = ResourceBundle.getBundle('messages', locale)
         rb
     }
 
@@ -255,17 +264,32 @@ class Launcher {
      * Starts Tomcat.
      */
     protected void startTomcat() {
-        outputArea.text = rb.getString('status.tomcatStarting')
+        output.clear()
+        output.output 'status.tomcatStarting'
         tomcatRunning = true
         enableControls()
+        try {
+            tomcatLauncher.start()
+        } catch (Exception) {
+            output.output 'error.tomcat.starting'
+            tomcatRunning = false
+            enableControls()
+        }
     }
 
     /**
      * Stops Tomcat.
      */
     protected void stopTomcat() {
-        outputArea.append rb.getString('status.tomcatStopping')
+        output.output 'status.tomcatStopping'
         tomcatRunning = false
         enableControls()
+        try {
+            tomcatLauncher.stop()
+        } catch (Exception) {
+            output.output 'error.tomcat.stopping'
+            tomcatRunning = false
+            enableControls()
+        }
     }
 }

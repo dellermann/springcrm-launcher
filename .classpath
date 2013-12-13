@@ -5,5 +5,11 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_DSL_SUPPORT"/>
+	<classpathentry kind="var" path="M2_REPO/org/apache/tomcat/tomcat-catalina/7.0.47/tomcat-catalina-7.0.47.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/apache/tomcat/tomcat-coyote/7.0.47/tomcat-coyote-7.0.47.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/apache/tomcat/tomcat-util/7.0.47/tomcat-util-7.0.47.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/apache/tomcat/tomcat-juli/7.0.47/tomcat-juli-7.0.47.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/apache/tomcat/tomcat-api/7.0.47/tomcat-api-7.0.47.jar"/>
+	<classpathentry kind="var" path="M2_REPO/org/apache/tomcat/tomcat-servlet-api/7.0.47/tomcat-servlet-api-7.0.47.jar"/>
 	<classpathentry kind="output" path="target/eclipse-bin"/>
 </classpath>
