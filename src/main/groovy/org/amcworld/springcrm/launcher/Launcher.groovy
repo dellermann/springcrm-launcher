@@ -73,9 +73,6 @@ class Launcher {
         initResourceBundle Locale.getDefault()
         output = new GuiOutput(resourceBundle: rb)
         this.extractor = new Extractor(this.args)
-        this.tomcatLauncher = new TomcatLauncher(
-            args: this.args, extractor: this.extractor, output: this.output
-        )
     }
 
 
@@ -91,7 +88,7 @@ class Launcher {
                         text: rb.getString('menu.file.start.label'),
                         mnemonic: rb.getString('menu.file.start.mnemonic'),
                         icon: imageIcon(resource: '/image/menu-start.png'),
-                        enabled: status > TomcatStatus.created,
+                        enabled: status == TomcatStatus.initialized,
                         actionPerformed: { startTomcat() }
                     )
                     menuItemStop = menuItem(
@@ -166,7 +163,7 @@ class Launcher {
                     icon: imageIcon(resource: '/image/start.png'),
                     horizontalTextPosition: CENTER,
                     verticalTextPosition: BOTTOM,
-                    enabled: status > TomcatStatus.created,
+                    enabled: status == TomcatStatus.initialized,
                     actionPerformed: { startTomcat() }
                 )
                 btnLaunch = button(
@@ -252,10 +249,10 @@ class Launcher {
      */
     protected void enableControls(TomcatStatus status) {
         this.status = status
-        btnStart.enabled = status > TomcatStatus.created
+        btnStart.enabled = status == TomcatStatus.initialized
         btnLaunch.enabled = status == TomcatStatus.started
         btnStop.enabled = status == TomcatStatus.started
-        menuItemStart.enabled = status > TomcatStatus.created
+        menuItemStart.enabled = status == TomcatStatus.initialized
         menuItemLaunch.enabled = status == TomcatStatus.started
         menuItemStop.enabled = status == TomcatStatus.started
     }
@@ -293,6 +290,9 @@ class Launcher {
         output.output 'status.tomcatStarting'
         enableControls TomcatStatus.starting
         try {
+            tomcatLauncher = new TomcatLauncher(
+                args: args, extractor: extractor, output: output
+            )
             tomcatLauncher.start()
             enableControls TomcatStatus.started
         } catch (Exception e) {
