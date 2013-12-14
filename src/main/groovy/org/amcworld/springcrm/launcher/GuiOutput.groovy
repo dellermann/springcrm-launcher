@@ -21,15 +21,23 @@
 package org.amcworld.springcrm.launcher
 
 import javax.swing.JTextArea
+import org.apache.logging.log4j.LogManager
+import org.apache.logging.log4j.Logger
 
 
 /**
- * The class {@code GuiOutput} represents ...
+ * The class {@code GuiOutput} represents an uniform access to the output area
+ * of the main window.
  *
  * @author  Daniel Ellermann
  * @version 1.0
  */
 class GuiOutput {
+
+    //-- Class variables ------------------------
+
+    private static Logger log = LogManager.getLogger(this.class)
+
 
     //-- Instance variables ---------------------
 

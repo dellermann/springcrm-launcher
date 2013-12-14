@@ -60,6 +60,7 @@ class Launcher {
     GuiOutput output
     JTextArea outputArea
     ResourceBundle rb
+    TomcatStatus status = TomcatStatus.created
     TomcatLauncher tomcatLauncher
     boolean tomcatRunning
     JFrame window
@@ -72,7 +73,6 @@ class Launcher {
         initResourceBundle Locale.getDefault()
         output = new GuiOutput(resourceBundle: rb)
         this.extractor = new Extractor(this.args)
-        this.extractor.extract()
         this.tomcatLauncher = new TomcatLauncher(
             args: this.args, extractor: this.extractor, output: this.output
         )
@@ -91,14 +91,14 @@ class Launcher {
                         text: rb.getString('menu.file.start.label'),
                         mnemonic: rb.getString('menu.file.start.mnemonic'),
                         icon: imageIcon(resource: '/image/menu-start.png'),
-                        enabled: !tomcatRunning,
+                        enabled: status > TomcatStatus.created,
                         actionPerformed: { startTomcat() }
                     )
                     menuItemStop = menuItem(
                         text: rb.getString('menu.file.stop.label'),
                         mnemonic: rb.getString('menu.file.stop.mnemonic'),
                         icon: imageIcon(resource: '/image/menu-stop.png'),
-                        enabled: tomcatRunning,
+                        enabled: status == TomcatStatus.started,
                         actionPerformed: { stopTomcat() }
                     )
                     separator()
@@ -106,7 +106,7 @@ class Launcher {
                         text: rb.getString('menu.file.launch.label'),
                         mnemonic: rb.getString('menu.file.launch.mnemonic'),
                         icon: imageIcon(resource: '/image/menu-springcrm.png'),
-                        enabled: tomcatRunning,
+                        enabled: status == TomcatStatus.started,
                         actionPerformed: { launchSpringcrm() }
                     )
                     separator()
@@ -115,6 +115,15 @@ class Launcher {
                         mnemonic: rb.getString('menu.file.quit.mnemonic'),
                         icon: imageIcon(resource: '/image/menu-quit.png'),
                         actionPerformed: { dispose() }
+                    )
+                }
+                menu(text: rb.getString('menu.view.label'),
+                     mnemonic: rb.getString('menu.view.mnemonic')) {
+                    menuItem(
+                        text: rb.getString('menu.view.clear.label'),
+                        mnemonic: rb.getString('menu.view.clear.mnemonic'),
+                        icon: imageIcon(resource: '/image/menu-clear.png'),
+                        actionPerformed: { output.clear() }
                     )
                 }
                 menu(text: rb.getString('menu.language.label'),
@@ -146,7 +155,9 @@ class Launcher {
                 }
             }
             borderLayout()
-            output.outputArea = textArea columns: 60, rows: 10, constraints: BL.NORTH
+            output.outputArea = textArea(
+                columns: 60, rows: 10, editable: false, constraints: BL.NORTH
+            )
             panel {
                 flowLayout()
                 btnStart = button(
@@ -155,7 +166,7 @@ class Launcher {
                     icon: imageIcon(resource: '/image/start.png'),
                     horizontalTextPosition: CENTER,
                     verticalTextPosition: BOTTOM,
-                    enabled: !tomcatRunning,
+                    enabled: status > TomcatStatus.created,
                     actionPerformed: { startTomcat() }
                 )
                 btnLaunch = button(
@@ -164,7 +175,7 @@ class Launcher {
                     icon: imageIcon(resource: '/image/springcrm.png'),
                     horizontalTextPosition: CENTER,
                     verticalTextPosition: BOTTOM,
-                    enabled: tomcatRunning,
+                    enabled: status == TomcatStatus.started,
                     actionPerformed: { launchSpringcrm() }
                 )
                 btnStop = button(
@@ -173,7 +184,7 @@ class Launcher {
                     icon: imageIcon(resource: '/image/stop.png'),
                     horizontalTextPosition: CENTER,
                     verticalTextPosition: BOTTOM,
-                    enabled: tomcatRunning,
+                    enabled: status == TomcatStatus.started,
                     actionPerformed: { stopTomcat() }
                 )
             }
@@ -188,6 +199,11 @@ class Launcher {
         def builder = new SwingBuilder()
         generateWindow.delegate = builder
         builder.edt generateWindow
+
+        output.output 'message.initializing'
+        this.extractor.extract()
+        output.output 'message.initialized'
+        enableControls TomcatStatus.initialized
     }
 
     static main(args) {
@@ -231,14 +247,17 @@ class Launcher {
     /**
      * Enables or disables the controls in the window depending on the running
      * status of Tomcat.
+     *
+     * @param status    the new status to set
      */
-    protected void enableControls() {
-        btnStart.enabled = !tomcatRunning
-        btnLaunch.enabled = tomcatRunning
-        btnStop.enabled = tomcatRunning
-        menuItemStart.enabled = !tomcatRunning
-        menuItemLaunch.enabled = tomcatRunning
-        menuItemStop.enabled = tomcatRunning
+    protected void enableControls(TomcatStatus status) {
+        this.status = status
+        btnStart.enabled = status > TomcatStatus.created
+        btnLaunch.enabled = status == TomcatStatus.started
+        btnStop.enabled = status == TomcatStatus.started
+        menuItemStart.enabled = status > TomcatStatus.created
+        menuItemLaunch.enabled = status == TomcatStatus.started
+        menuItemStop.enabled = status == TomcatStatus.started
     }
 
     /**
@@ -272,15 +291,15 @@ class Launcher {
     protected void startTomcat() {
         output.clear()
         output.output 'status.tomcatStarting'
-        tomcatRunning = true
-        enableControls()
+        enableControls TomcatStatus.starting
         try {
             tomcatLauncher.start()
+            enableControls TomcatStatus.started
         } catch (Exception e) {
             log.error 'Error loading Tomcat.', e
             output.output 'error.tomcat.starting'
             tomcatRunning = false
-            enableControls()
+            enableControls TomcatStatus.initialized
         }
     }
 
@@ -289,15 +308,14 @@ class Launcher {
      */
     protected void stopTomcat() {
         output.output 'status.tomcatStopping'
-        tomcatRunning = false
-        enableControls()
+        enableControls TomcatStatus.stopping
         try {
             tomcatLauncher.stop()
+            enableControls TomcatStatus.initialized
         } catch (Exception e) {
             log.error 'Error stopping Tomcat.', e
             output.output 'error.tomcat.stopping'
-            tomcatRunning = false
-            enableControls()
+            enableControls TomcatStatus.started
         }
     }
 }

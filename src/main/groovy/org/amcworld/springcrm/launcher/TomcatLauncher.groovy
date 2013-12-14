@@ -36,7 +36,8 @@ import org.apache.logging.log4j.Logger
 
 
 /**
- * The class {@code TomcatLauncher} represents ...
+ * The class {@code TomcatLauncher} represents a launcher of Tomcat.  It offers
+ * methods to start and stop a Tomcat instance.
  *
  * @author  Daniel Ellermann
  * @version 1.0
@@ -59,6 +60,9 @@ class TomcatLauncher {
 
     //-- Public methods -------------------------
 
+    /**
+     * Configures Tomcat and starts it.
+     */
     void start() {
         File workDir = args.workDir
 
@@ -111,6 +115,9 @@ class TomcatLauncher {
         output.output 'message.tomcat.running'
     }
 
+    /**
+     * Stops Tomcat.
+     */
     void stop() {
         tomcat.stop()
     }
@@ -118,11 +125,16 @@ class TomcatLauncher {
 
     //-- Non-public methods ---------------------
 
+    /**
+     * Adds a lifecycle listener to Tomcat to stop Tomcat when an error
+     * occurred.
+     */
     protected void addFailureLifecycleListener() {
         context.addLifecycleListener({ LifecycleEvent event ->
             if (event.lifecycle.state == LifecycleState.FAILED) {
                 Server server = tomcat.server
                 if (server instanceof StandardServer) {
+                    log.error "Context failed in ${event.lifecycle.class.name} lifecycle. Allowing Tomcat to shutdown."
                     output.output 'error.tomcat.context'
                     server.stopAwait()
                 }
@@ -153,6 +165,7 @@ class TomcatLauncher {
                     tomcat.server.stop()
                 }
             } catch (LifecycleException e) {
+                log.error 'Cannot stop Tomcat.', e
                 output.output 'error.tomcat.cannotStop'
             }
         } as Thread)
@@ -193,40 +206,47 @@ class TomcatLauncher {
         context.sessionTimeout = config.sessionTimeout
 
         if (config.httpsPort > 0) {
-            initSSL config
-            createSSLConnector config
+            if (initSSL(config)) {
+                createSSLConnector config
+            }
         }
     }
 
+    /**
+     * Creates an SSL connector using the given configuration data.
+     *
+     * @param config    the given configuration data
+     */
     protected void createSSLConnector(Map config) {
         Connector sslConnector
         try {
             sslConnector = new Connector()
         } catch (Exception e) {
-            throw new RuntimeException("Couldn't create HTTPS connector", e)
+            log.warn 'Couldn\'t create HTTPS connector. Use HTTP instead.', e
+            return
         }
 
-        sslConnector.scheme = "https"
+        sslConnector.scheme = 'https'
         sslConnector.secure = true
         sslConnector.port = config.httpsPort
-        sslConnector.setProperty "SSLEnabled", "true"
-        sslConnector.URIEncoding = "UTF-8"
+        sslConnector.setProperty 'SSLEnabled', 'true'
+        sslConnector.URIEncoding = 'UTF-8'
 
-        sslConnector.setAttribute "keystoreFile", config.keystoreFile.absolutePath
-        sslConnector.setAttribute "keystorePass", config.keystorePassword
+        sslConnector.setAttribute 'keystoreFile', config.keystoreFile.absolutePath
+        sslConnector.setAttribute 'keystorePass', config.keystorePassword
 
         if (config.truststorePath) {
-            sslConnector.setProperty "sslProtocol", "tls"
-            sslConnector.setAttribute "truststoreFile", new File(config.truststorePath).absolutePath
-            sslConnector.setAttribute "trustStorePassword", config.trustStorePassword
+            sslConnector.setProperty 'sslProtocol', 'tls'
+            sslConnector.setAttribute 'truststoreFile', new File(config.truststorePath).absolutePath
+            sslConnector.setAttribute 'trustStorePassword', config.trustStorePassword
         }
 
         if (config.enableClientAuth) {
-            sslConnector.setAttribute "clientAuth", true
+            sslConnector.setAttribute 'clientAuth', true
         }
 
-        if (!config.host == "localhost") {
-            sslConnector.setAttribute "address", config.host
+        if (!config.host == 'localhost') {
+            sslConnector.setAttribute 'address', config.host
         }
 
         tomcat.service.addConnector sslConnector
@@ -240,27 +260,31 @@ class TomcatLauncher {
         }
     }
 
-    protected void initSSL(Map config) {
+    /**
+     * Initializes SSL for Tomcat using the given configuration data.
+     *
+     * @param config    the given configuration data
+     * @return          {@code true} if the initialization was successful;
+     *                  {@code false} otherwise
+     */
+    protected boolean initSSL(Map config) {
         if (config.keystoreFile.exists()) {
-            return
+            return true
         }
 
         if (config.usingUserKeystore) {
-            throw new IllegalStateException(
-                "Cannot start in HTTPS because used keystore does not exist (value: ${config.keystoreFile})"
-            )
+            log.warn "Cannot start in HTTPS because used keystore does not exist (value: ${config.keystoreFile}). Use HTTP instead."
+            return false
         }
-
-        output.output 'message.ssl.createCertificates'
 
         File keystoreDir = config.keystoreFile.parentFile
         if (!keystoreDir.exists() && !keystoreDir.mkdir()) {
-            throw new RuntimeException(
-                "Unable to create keystore folder: ${config.keystoreDir.canonicalPath}"
-            )
+            log.warn "Unable to create keystore folder: ${config.keystoreDir.canonicalPath}. Use HTTP instead."
+            return false
         }
 
         try {
+            output.output 'message.ssl.createCertificates'
             keyToolClass.main([
                 '-genkey',
                 '-alias', 'localhost',
@@ -273,8 +297,11 @@ class TomcatLauncher {
                 '-keypass', config.keystorePassword
             ] as String[])
             output.output 'message.ssl.createdCertificates'
+            return true
         } catch (Exception e) {
-            System.err.println("Unable to create an SSL certificate: " + e.getMessage());
+            log.warn 'Unable to create an SSL certificate.', e
+            output.output 'error.ssl.certificates'
+            return false
         }
     }
 }
