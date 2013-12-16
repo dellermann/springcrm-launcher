@@ -19,8 +19,7 @@
 
 package org.amcworld.springcrm.launcher
 
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
+import groovy.util.logging.Log4j
 
 
 /**
@@ -30,6 +29,7 @@ import org.apache.logging.log4j.Logger
  * @author  Daniel Ellermann
  * @version 1.0
  */
+@Log4j
 class Arguments {
 
     //-- Constants ------------------------------
@@ -43,11 +43,6 @@ class Arguments {
         'enableCompression', 'compressableMimeTypes', 'sessionTimeout', 'nio',
         'tomcat.nio', 'war'
     ].asImmutable()
-
-
-    //-- Class variables ------------------------
-
-    private static Logger log = LogManager.getLogger(this.class)
 
 
     //-- Instance variables ---------------------

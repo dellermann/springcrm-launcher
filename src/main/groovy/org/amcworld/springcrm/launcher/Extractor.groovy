@@ -20,10 +20,9 @@
 
 package org.amcworld.springcrm.launcher
 
+import groovy.util.logging.Log4j
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 
 
 /**
@@ -33,23 +32,21 @@ import org.apache.logging.log4j.Logger
  * @author  Daniel Ellermann
  * @version 1.0
  */
+@Log4j
 class Extractor {
-
-    //-- Class variables ------------------------
-
-    private static Logger log = LogManager.getLogger(this.class)
-
 
     //-- Instance variables ---------------------
 
     File destDir
     protected Arguments args
+    protected GuiOutput output
 
 
     //-- Constructor ----------------------------
 
-    Extractor(Arguments args) {
+    Extractor(Arguments args, GuiOutput output) {
         this.args = args
+        this.output = output
     }
 
 
@@ -88,10 +85,14 @@ class Extractor {
             "${basename}-exploded-${System.currentTimeMillis()}"
         )
 
-        ZipFile zipfile = new ZipFile(war)
-        Enumeration<? extends ZipEntry> e = zipfile.entries()
-        while (e) unzip e.nextElement(), zipfile, destDir
-        zipfile.close()
+        ZipFile zipFile = new ZipFile(war)
+        output.startDeterminateProgress zipFile.size()
+        Enumeration<? extends ZipEntry> e = zipFile.entries()
+        for (int i = 1; e; i++) {
+            output.progress i
+            unzip e.nextElement(), zipFile, destDir
+        }
+        zipFile.close()
 
         destDir
     }

@@ -20,6 +20,7 @@
 
 package org.amcworld.springcrm.launcher
 
+import groovy.util.logging.Log4j
 import org.apache.catalina.Context
 import org.apache.catalina.LifecycleEvent
 import org.apache.catalina.LifecycleException
@@ -31,8 +32,6 @@ import org.apache.catalina.core.StandardServer
 import org.apache.catalina.startup.Tomcat
 import org.apache.catalina.valves.CrawlerSessionManagerValve
 import org.apache.coyote.http11.Http11NioProtocol
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 
 
 /**
@@ -42,12 +41,8 @@ import org.apache.logging.log4j.Logger
  * @author  Daniel Ellermann
  * @version 1.0
  */
+@Log4j
 class TomcatLauncher {
-
-    //-- Class variables ------------------------
-
-    private static Logger log = LogManager.getLogger(this.class)
-
 
     //-- Instance variables ---------------------
 
@@ -112,7 +107,6 @@ class TomcatLauncher {
         addFailureLifecycleListener()
 
         tomcat.start()
-        output.output 'message.tomcat.running'
     }
 
     /**

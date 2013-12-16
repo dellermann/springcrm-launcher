@@ -22,6 +22,7 @@ package org.amcworld.springcrm.launcher
 
 import static javax.swing.SwingConstants.*
 import groovy.swing.SwingBuilder
+import groovy.util.logging.Log4j
 import java.awt.BorderLayout as BL
 import java.awt.Desktop
 import javax.swing.JButton
@@ -29,8 +30,6 @@ import javax.swing.JFrame
 import javax.swing.JMenuItem
 import javax.swing.JOptionPane
 import javax.swing.JTextArea
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 
 
 /**
@@ -40,12 +39,8 @@ import org.apache.logging.log4j.Logger
  * @author  Daniel Ellermann
  * @version 1.0
  */
+@Log4j
 class Launcher {
-
-    //-- Class variables ------------------------
-
-    private static Logger log = LogManager.getLogger(this.class)
-
 
     //-- Instance variables ---------------------
 
@@ -62,7 +57,6 @@ class Launcher {
     ResourceBundle rb
     TomcatStatus status = TomcatStatus.created
     TomcatLauncher tomcatLauncher
-    boolean tomcatRunning
     JFrame window
 
 
@@ -71,13 +65,16 @@ class Launcher {
     Launcher(String [] args) {
         this.args = new Arguments(args)
         initResourceBundle Locale.getDefault()
-        output = new GuiOutput(resourceBundle: rb)
-        this.extractor = new Extractor(this.args)
+        this.output = new GuiOutput(resourceBundle: rb)
+        this.extractor = new Extractor(this.args, this.output)
     }
 
 
     //-- Public methods -------------------------
 
+    /**
+     * Generates the main window of the application.
+     */
     def generateWindow = {
         window = frame(title: rb.getString('title'), show: true,
                        defaultCloseOperation: JFrame.DISPOSE_ON_CLOSE) {
@@ -156,34 +153,38 @@ class Launcher {
                 columns: 60, rows: 10, editable: false, constraints: BL.NORTH
             )
             panel {
-                flowLayout()
-                btnStart = button(
-                    text: rb.getString('button.start.label'),
-                    mnemonic: rb.getString('button.start.mnemonic'),
-                    icon: imageIcon(resource: '/image/start.png'),
-                    horizontalTextPosition: CENTER,
-                    verticalTextPosition: BOTTOM,
-                    enabled: status == TomcatStatus.initialized,
-                    actionPerformed: { startTomcat() }
-                )
-                btnLaunch = button(
-                    text: rb.getString('button.launch.label'),
-                    mnemonic: rb.getString('button.launch.mnemonic'),
-                    icon: imageIcon(resource: '/image/springcrm.png'),
-                    horizontalTextPosition: CENTER,
-                    verticalTextPosition: BOTTOM,
-                    enabled: status == TomcatStatus.started,
-                    actionPerformed: { launchSpringcrm() }
-                )
-                btnStop = button(
-                    text: rb.getString('button.stop.label'),
-                    mnemonic: rb.getString('button.stop.mnemonic'),
-                    icon: imageIcon(resource: '/image/stop.png'),
-                    horizontalTextPosition: CENTER,
-                    verticalTextPosition: BOTTOM,
-                    enabled: status == TomcatStatus.started,
-                    actionPerformed: { stopTomcat() }
-                )
+                borderLayout()
+                panel(constraints: BL.NORTH) {
+                    flowLayout()
+                    btnStart = button(
+                        text: rb.getString('button.start.label'),
+                        mnemonic: rb.getString('button.start.mnemonic'),
+                        icon: imageIcon(resource: '/image/start.png'),
+                        horizontalTextPosition: CENTER,
+                        verticalTextPosition: BOTTOM,
+                        enabled: status == TomcatStatus.initialized,
+                        actionPerformed: { startTomcat() }
+                    )
+                    btnLaunch = button(
+                        text: rb.getString('button.launch.label'),
+                        mnemonic: rb.getString('button.launch.mnemonic'),
+                        icon: imageIcon(resource: '/image/springcrm.png'),
+                        horizontalTextPosition: CENTER,
+                        verticalTextPosition: BOTTOM,
+                        enabled: status == TomcatStatus.started,
+                        actionPerformed: { launchSpringcrm() }
+                    )
+                    btnStop = button(
+                        text: rb.getString('button.stop.label'),
+                        mnemonic: rb.getString('button.stop.mnemonic'),
+                        icon: imageIcon(resource: '/image/stop.png'),
+                        horizontalTextPosition: CENTER,
+                        verticalTextPosition: BOTTOM,
+                        enabled: status == TomcatStatus.started,
+                        actionPerformed: { stopTomcat() }
+                    )
+                }
+                output.progressBar = progressBar()
             }
         }
         window.pack()
@@ -197,10 +198,12 @@ class Launcher {
         generateWindow.delegate = builder
         builder.edt generateWindow
 
-        output.output 'message.initializing'
-        this.extractor.extract()
-        output.output 'message.initialized'
-        enableControls TomcatStatus.initialized
+        Thread.start {
+            output.output 'message.initializing'
+            this.extractor.extract()
+            output.output 'message.initialized'
+            enableControls TomcatStatus.initialized
+        }
     }
 
     static main(args) {
@@ -286,20 +289,29 @@ class Launcher {
      * Starts Tomcat.
      */
     protected void startTomcat() {
-        output.clear()
-        output.output 'status.tomcatStarting'
-        enableControls TomcatStatus.starting
-        try {
-            tomcatLauncher = new TomcatLauncher(
-                args: args, extractor: extractor, output: output
-            )
-            tomcatLauncher.start()
-            enableControls TomcatStatus.started
-        } catch (Exception e) {
-            log.error 'Error loading Tomcat.', e
-            output.output 'error.tomcat.starting'
-            tomcatRunning = false
-            enableControls TomcatStatus.initialized
+        Thread.start {
+            log.debug 'Starting Tomcat...'
+            long time = System.currentTimeMillis()
+            output.clear()
+            output.output 'status.tomcatStarting'
+            output.startIndeterminateProgress()
+            enableControls TomcatStatus.starting
+            try {
+                tomcatLauncher = new TomcatLauncher(
+                    args: args, extractor: extractor, output: output
+                )
+                tomcatLauncher.start()
+                log.debug "Tomcat started successfully (took ${(System.currentTimeMillis() - time) / 1000} s)."
+                println "Tomcat started successfully (took ${(System.currentTimeMillis() - time) / 1000} s)."
+                output.output 'message.tomcat.running'
+                enableControls TomcatStatus.started
+            } catch (e) {
+                log.error 'Error loading Tomcat.', e
+                output.output 'error.tomcat.starting'
+                enableControls TomcatStatus.initialized
+            } finally {
+                output.startDeterminateProgress()
+            }
         }
     }
 
@@ -307,15 +319,23 @@ class Launcher {
      * Stops Tomcat.
      */
     protected void stopTomcat() {
-        output.output 'status.tomcatStopping'
-        enableControls TomcatStatus.stopping
-        try {
-            tomcatLauncher.stop()
-            enableControls TomcatStatus.initialized
-        } catch (Exception e) {
-            log.error 'Error stopping Tomcat.', e
-            output.output 'error.tomcat.stopping'
-            enableControls TomcatStatus.started
+        Thread.start {
+            output.output 'status.tomcatStopping'
+            output.startIndeterminateProgress()
+            enableControls TomcatStatus.stopping
+            try {
+                tomcatLauncher.stop()
+                tomcatLauncher = null
+                log.debug 'Tomcat stopped successfully.'
+                output.output 'message.tomcat.stopped'
+                enableControls TomcatStatus.initialized
+            } catch (e) {
+                log.error 'Error stopping Tomcat.', e
+                output.output 'error.tomcat.stopping'
+                enableControls TomcatStatus.started
+            } finally {
+                output.startDeterminateProgress()
+            }
         }
     }
 }

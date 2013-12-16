@@ -20,9 +20,9 @@
 
 package org.amcworld.springcrm.launcher
 
+import groovy.util.logging.Log4j
+import javax.swing.JProgressBar
 import javax.swing.JTextArea
-import org.apache.logging.log4j.LogManager
-import org.apache.logging.log4j.Logger
 
 
 /**
@@ -32,16 +32,13 @@ import org.apache.logging.log4j.Logger
  * @author  Daniel Ellermann
  * @version 1.0
  */
+@Log4j
 class GuiOutput {
-
-    //-- Class variables ------------------------
-
-    private static Logger log = LogManager.getLogger(this.class)
-
 
     //-- Instance variables ---------------------
 
     JTextArea outputArea
+    JProgressBar progressBar
     ResourceBundle resourceBundle
 
 
@@ -62,5 +59,36 @@ class GuiOutput {
      */
     void output(String key) {
         outputArea.append resourceBundle.getString(key) + '\n'
+    }
+
+    /**
+     * Displays the given value in the progress bar.  You must call method
+     * {@code startDeterminateProgress} before.
+     *
+     * @param value the value to display
+     * @see         #startDeterminateProgress(int)
+     */
+    void progress(int value) {
+        progressBar.value = value
+    }
+
+    /**
+     * Starts the progress bar in determinate fashion using the given maximum
+     * value.
+     *
+     * @param max   the given maximum value
+     * @see         #progress(int)
+     */
+    void startDeterminateProgress(int max = 0) {
+        progressBar.indeterminate = false
+        progressBar.maximum = max
+        progressBar.value = 0
+    }
+
+    /**
+     * Starts the progress bar in indeterminate fashion.
+     */
+    void startIndeterminateProgress()  {
+        progressBar.indeterminate = true
     }
 }
