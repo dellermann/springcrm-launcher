@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <!--===========================================
@@ -11,10 +9,16 @@
 
   ============================================-->
 
-  <groupId>org.amcworld.springcrm</groupId>
+  <groupId>de.amc-world.springcrm</groupId>
   <artifactId>springcrm-launcher</artifactId>
   <version>1.0.0</version>
   <packaging>jar</packaging>
+
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
 
 
   <!--===========================================
@@ -25,7 +29,7 @@
 
   <name>SpringCRM Launcher</name>
   <description>A launcher for SpringCRM, an open source CRM.</description>
-  <url>http://www.amc-world.de/springcrm</url>
+  <url>http://www.springcrm.de</url>
   <inceptionYear>2013</inceptionYear>
 
   <organization>
@@ -55,30 +59,16 @@
   </developers>
 
   <scm>
-    <connection>scm:git://github.com/dellermann/springcrm.git</connection>
-    <developerConnection>scm:git:git@github.com:dellermann/springcrm.git</developerConnection>
+    <connection>scm:git://github.com/dellermann/springcrm-launcher.git</connection>
+    <developerConnection>scm:git:git@github.com:dellermann/springcrm-launcher.git</developerConnection>
     <tag>HEAD</tag>
-    <url>https://github.com/dellermann/springcrm.git</url>
+    <url>https://github.com/dellermann/springcrm-launcher.git</url>
   </scm>
 
   <issueManagement>
-    <system>Bugzilla</system>
-    <url>http://bugs.amc-world.ath.cx/</url>
+    <system>GitHub</system>
+    <url>https://github.com/dellermann/springcrm-launcher/issues/</url>
   </issueManagement>
-
-
-  <!--===========================================
-
-    REPOSITORIES
-
-  ============================================-->
-
-  <repositories>
-    <repository>
-      <id>grails</id>
-      <url>http://repo.grails.org/grails/plugins-releases-local</url>
-    </repository>
-  </repositories>
 
 
   <!--===========================================
@@ -247,6 +237,21 @@
                 </manifest>
               </archive>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
