@@ -30,7 +30,6 @@ import org.apache.catalina.Server
 import org.apache.catalina.connector.Connector
 import org.apache.catalina.core.StandardServer
 import org.apache.catalina.startup.Tomcat
-import org.apache.catalina.valves.CrawlerSessionManagerValve
 import org.apache.coyote.http11.Http11NioProtocol
 
 
@@ -47,6 +46,7 @@ class TomcatLauncher {
     //-- Instance variables ---------------------
 
     protected Arguments args
+    protected Connector connector
     protected Context context
     protected Extractor extractor
     protected GuiOutput output
@@ -114,6 +114,10 @@ class TomcatLauncher {
      */
     void stop() {
         tomcat.stop()
+        if (connector) {
+            connector.stop()
+            connector.destroy()
+        }
     }
 
 
@@ -143,7 +147,7 @@ class TomcatLauncher {
      */
     protected void addNioConnector(int port) {
         output.output 'message.nio.enable'
-        Connector connector = new Connector(Http11NioProtocol.class.name)
+        connector = new Connector(Http11NioProtocol.class.name)
         connector.port = port
         tomcat.connector = connector
         tomcat.service.addConnector tomcat.connector
@@ -183,15 +187,13 @@ class TomcatLauncher {
             addNioConnector config.port
         }
 
-        tomcat.engine.pipeline.addValve new CrawlerSessionManagerValve()
-
         Connector connector = tomcat.connector
         if (config.enableCompression) {
             connector.setProperty 'compression', 'on'
             connector.setProperty 'compressableMimeType', config.compressableMimeTypes
         }
 
-        // Only bind to host name if we aren't using the default
+        /* only bind to host name if we aren't using the default */
         if (config.host != 'localhost') {
             connector.setAttribute 'address', config.host
         }
