@@ -22,13 +22,8 @@ package org.amcworld.springcrm.launcher
 
 import groovy.util.logging.Log4j
 import org.apache.catalina.Context
-import org.apache.catalina.LifecycleEvent
 import org.apache.catalina.LifecycleException
-import org.apache.catalina.LifecycleListener
-import org.apache.catalina.LifecycleState
-import org.apache.catalina.Server
 import org.apache.catalina.connector.Connector
-import org.apache.catalina.core.StandardServer
 import org.apache.catalina.startup.Tomcat
 import org.apache.coyote.http11.Http11NioProtocol
 
@@ -46,8 +41,10 @@ class TomcatLauncher {
     //-- Instance variables ---------------------
 
     protected Arguments args
+    protected boolean autostart
     protected Connector connector
     protected Context context
+    protected GuiControls controls
     protected Extractor extractor
     protected GuiOutput output
     protected Tomcat tomcat = new Tomcat()
@@ -104,7 +101,6 @@ class TomcatLauncher {
         )
 
         addShutdownHook()
-        addFailureLifecycleListener()
 
         tomcat.start()
     }
@@ -122,23 +118,6 @@ class TomcatLauncher {
 
 
     //-- Non-public methods ---------------------
-
-    /**
-     * Adds a lifecycle listener to Tomcat to stop Tomcat when an error
-     * occurred.
-     */
-    protected void addFailureLifecycleListener() {
-        context.addLifecycleListener({ LifecycleEvent event ->
-            if (event.lifecycle.state == LifecycleState.FAILED) {
-                Server server = tomcat.server
-                if (server instanceof StandardServer) {
-                    log.error "Context failed in ${event.lifecycle.class.name} lifecycle. Allowing Tomcat to shutdown."
-                    output.output 'error.tomcat.context'
-                    server.stopAwait()
-                }
-            }
-        } as LifecycleListener)
-    }
 
     /**
      * Adds the NIO connector to Tomcat.
@@ -181,6 +160,10 @@ class TomcatLauncher {
         context = tomcat.addWebapp(
             config.contextPath, config.destDir.absolutePath
         )
+        context.addLifecycleListener(new TomcatLifecycleListener(
+            tomcat: tomcat, output: output, controls: controls,
+            autostart: autostart
+        ))
         tomcat.enableNaming()
 
         if (config.useNio) {

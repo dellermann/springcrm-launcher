@@ -41,7 +41,7 @@ import javax.swing.JTextArea
  * @version 1.0
  */
 @Log4j
-class Launcher {
+class Launcher implements GuiControls {
 
     //-- Instance variables ---------------------
 
@@ -72,6 +72,22 @@ class Launcher {
 
 
     //-- Public methods -------------------------
+
+    /**
+     * Enables or disables the controls in the window depending on the running
+     * status of Tomcat.
+     *
+     * @param status    the new status to set
+     */
+    void enableControls(TomcatStatus status) {
+        this.status = status
+        btnStart.enabled = status == TomcatStatus.initialized
+        btnLaunch.enabled = status == TomcatStatus.started
+        btnStop.enabled = status == TomcatStatus.started
+        menuItemStart.enabled = status == TomcatStatus.initialized
+        menuItemLaunch.enabled = status == TomcatStatus.started
+        menuItemStop.enabled = status == TomcatStatus.started
+    }
 
     /**
      * Generates the main window of the application.
@@ -259,22 +275,6 @@ class Launcher {
     }
 
     /**
-     * Enables or disables the controls in the window depending on the running
-     * status of Tomcat.
-     *
-     * @param status    the new status to set
-     */
-    protected void enableControls(TomcatStatus status) {
-        this.status = status
-        btnStart.enabled = status == TomcatStatus.initialized
-        btnLaunch.enabled = status == TomcatStatus.started
-        btnStop.enabled = status == TomcatStatus.started
-        menuItemStart.enabled = status == TomcatStatus.initialized
-        menuItemLaunch.enabled = status == TomcatStatus.started
-        menuItemStop.enabled = status == TomcatStatus.started
-    }
-
-    /**
      * Initializes the resource bundle for the given locale.
      *
      * @param locale    the given locale
@@ -307,21 +307,12 @@ class Launcher {
      */
     protected void startTomcat(boolean autostart = false) {
         Thread.start {
-            log.debug 'Starting Tomcat...'
-            long time = System.currentTimeMillis()
-            output.clear()
-            output.output autostart ? 'status.tomcatAutoStarting' : 'status.tomcatStarting'
-            output.startIndeterminateProgress()
-            enableControls TomcatStatus.starting
             try {
                 tomcatLauncher = new TomcatLauncher(
-                    args: args, extractor: extractor, output: output
+                    args: args, extractor: extractor, output: output,
+                    controls: this, autostart: autostart
                 )
                 tomcatLauncher.start()
-                log.debug "Tomcat started successfully (took ${(System.currentTimeMillis() - time) / 1000} s)."
-                println "Tomcat started successfully (took ${(System.currentTimeMillis() - time) / 1000} s)."
-                output.output 'message.tomcat.running'
-                enableControls TomcatStatus.started
             } catch (e) {
                 log.error 'Error loading Tomcat.', e
                 output.output 'error.tomcat.starting'
@@ -337,15 +328,9 @@ class Launcher {
      */
     protected void stopTomcat() {
         Thread.start {
-            output.output 'status.tomcatStopping'
-            output.startIndeterminateProgress()
-            enableControls TomcatStatus.stopping
             try {
                 tomcatLauncher.stop()
                 tomcatLauncher = null
-                log.debug 'Tomcat stopped successfully.'
-                output.output 'message.tomcat.stopped'
-                enableControls TomcatStatus.initialized
             } catch (e) {
                 log.error 'Error stopping Tomcat.', e
                 output.output 'error.tomcat.stopping'

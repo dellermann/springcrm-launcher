@@ -27,7 +27,7 @@ import javax.swing.JTextArea
 
 /**
  * The class {@code GuiOutput} represents an uniform access to the output area
- * of the main window.
+ * and progress bar of the main window.
  *
  * @author  Daniel Ellermann
  * @version 1.0
