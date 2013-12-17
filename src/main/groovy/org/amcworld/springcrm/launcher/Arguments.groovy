@@ -41,7 +41,7 @@ class Arguments {
         'javax.net.ssl.trustStore', 'trustStorePassword',
         'javax.net.ssl.trustStorePassword', 'enableClientAuth', 'workDir',
         'enableCompression', 'compressableMimeTypes', 'sessionTimeout', 'nio',
-        'tomcat.nio', 'war'
+        'tomcat.nio', 'war', 'autostart', 'minimized'
     ].asImmutable()
 
 

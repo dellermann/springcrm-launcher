@@ -20,6 +20,7 @@
 
 package org.amcworld.springcrm.launcher
 
+import static javax.swing.ScrollPaneConstants.*
 import static javax.swing.SwingConstants.*
 import groovy.swing.SwingBuilder
 import groovy.util.logging.Log4j
@@ -149,10 +150,14 @@ class Launcher {
                 }
             }
             borderLayout()
-            output.outputArea = textArea(
-                columns: 60, rows: 10, editable: false, constraints: BL.NORTH
-            )
-            panel {
+            scrollPane(horizontalScrollBarPolicy: HORIZONTAL_SCROLLBAR_NEVER,
+                       verticalScrollBarPolicy: VERTICAL_SCROLLBAR_AS_NEEDED,
+                       preferredSize: [500, 150]) {
+                output.outputArea = textArea(
+                    editable: false, lineWrap: true, wrapStyleWord: true
+                )
+            }
+            panel(constraints: BL.SOUTH) {
                 borderLayout()
                 panel(constraints: BL.NORTH) {
                     flowLayout()
@@ -184,8 +189,11 @@ class Launcher {
                         actionPerformed: { stopTomcat() }
                     )
                 }
-                output.progressBar = progressBar()
+                output.progressBar = progressBar(constraints: BL.SOUTH)
             }
+        }
+        if (args.getBoolean('minimized', false)) {
+            window.visible = false
         }
         window.pack()
     }
@@ -203,6 +211,12 @@ class Launcher {
             this.extractor.extract()
             output.output 'message.initialized'
             enableControls TomcatStatus.initialized
+
+            if (args.getBoolean('autostart', false)
+                || args.getBoolean('minimized', false))
+            {
+                startTomcat true
+            }
         }
     }
 
@@ -287,13 +301,16 @@ class Launcher {
 
     /**
      * Starts Tomcat.
+     *
+     * @param autostart if {@code true} Tomcat is auto-started and a message to
+     *                  the user is displayed
      */
-    protected void startTomcat() {
+    protected void startTomcat(boolean autostart = false) {
         Thread.start {
             log.debug 'Starting Tomcat...'
             long time = System.currentTimeMillis()
             output.clear()
-            output.output 'status.tomcatStarting'
+            output.output autostart ? 'status.tomcatAutoStarting' : 'status.tomcatStarting'
             output.startIndeterminateProgress()
             enableControls TomcatStatus.starting
             try {
