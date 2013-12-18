@@ -55,15 +55,15 @@
   </developers>
 
   <scm>
-    <connection>scm:git://github.com/dellermann/springcrm.git</connection>
-    <developerConnection>scm:git:git@github.com:dellermann/springcrm.git</developerConnection>
+    <connection>scm:git://github.com/dellermann/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:git@github.com:dellermann/${project.artifactId}.git</developerConnection>
     <tag>HEAD</tag>
-    <url>https://github.com/dellermann/springcrm.git</url>
+    <url>https://github.com/dellermann/${project.artifactId}.git</url>
   </scm>
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/dellermann/springcrm-launcher/issues</url>
+    <url>https://github.com/dellermann/${project.artifactId}/issues</url>
   </issueManagement>
 
 
@@ -223,9 +223,9 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <descriptorRefs>
-                <descriptorRef>jar-with-dependencies</descriptorRef>
-              </descriptorRefs>
+              <descriptors>
+                <descriptor>${project.basedir}/src/main/assembly/embedded.xml</descriptor>
+              </descriptors>
               <archive>
                 <manifest>
                   <addClasspath>true</addClasspath>
