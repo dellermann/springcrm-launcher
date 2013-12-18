@@ -62,23 +62,9 @@
   </scm>
 
   <issueManagement>
-    <system>Bugzilla</system>
-    <url>http://bugs.amc-world.ath.cx/</url>
+    <system>GitHub</system>
+    <url>https://github.com/dellermann/springcrm-launcher/issues</url>
   </issueManagement>
-
-
-  <!--===========================================
-
-    REPOSITORIES
-
-  ============================================-->
-
-  <repositories>
-    <repository>
-      <id>grails</id>
-      <url>http://repo.grails.org/grails/plugins-releases-local</url>
-    </repository>
-  </repositories>
 
 
   <!--===========================================
@@ -247,6 +233,21 @@
                 </manifest>
               </archive>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.4</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
