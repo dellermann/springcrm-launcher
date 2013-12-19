@@ -20,11 +20,12 @@
 
 package org.amcworld.springcrm.launcher
 
-import static org.apache.catalina.LifecycleState.*
+import static org.apache.catalina.Lifecycle.*
 import groovy.util.logging.Log4j
 import org.apache.catalina.Lifecycle
 import org.apache.catalina.LifecycleEvent
 import org.apache.catalina.LifecycleListener
+import org.apache.catalina.LifecycleState
 import org.apache.catalina.Server
 import org.apache.catalina.core.StandardServer
 import org.apache.catalina.startup.Tomcat
@@ -56,8 +57,18 @@ class TomcatLifecycleListener implements LifecycleListener {
     @Override
     void lifecycleEvent(LifecycleEvent event) {
         Lifecycle l = event.lifecycle
-        switch (l.state) {
-        case STARTING_PREP:
+        if (l.state == LifecycleState.FAILED) {
+            Server server = tomcat.server
+            if (server instanceof StandardServer) {
+                log.error "Context failed in ${l.class.name} lifecycle. Allowing Tomcat to shutdown."
+                output.output 'error.tomcat.context'
+                server.stopAwait()
+            }
+            return
+        }
+
+        switch (event.type) {
+        case BEFORE_START_EVENT:
             log.debug 'Starting Tomcat...'
             time = System.currentTimeMillis()
             output.clear()
@@ -65,29 +76,24 @@ class TomcatLifecycleListener implements LifecycleListener {
             output.startIndeterminateProgress()
             controls.enableControls TomcatStatus.starting
             break
-        case STARTED:
+        case AFTER_START_EVENT:
             log.debug "Tomcat started successfully (took ${(System.currentTimeMillis() - time) / 1000} s)."
             println "Tomcat started successfully (took ${(System.currentTimeMillis() - time) / 1000} s)."
             output.output 'message.tomcat.running'
             controls.enableControls TomcatStatus.started
             break
-        case STOPPING_PREP:
+        case BEFORE_STOP_EVENT:
+            log.debug 'Stopping Tomcat...'
+            time = System.currentTimeMillis()
             output.output 'status.tomcatStopping'
             output.startIndeterminateProgress()
             controls.enableControls TomcatStatus.stopping
             break
-        case STOPPED:
-            log.debug 'Tomcat stopped successfully.'
+        case AFTER_STOP_EVENT:
+            log.debug 'Tomcat stopped successfully (took ${(System.currentTimeMillis() - time) / 1000} s).'
+            println "Tomcat stopped successfully (took ${(System.currentTimeMillis() - time) / 1000} s)."
             output.output 'message.tomcat.stopped'
             controls.enableControls TomcatStatus.initialized
-            break
-        case FAILED:
-            Server server = tomcat.server
-            if (server instanceof StandardServer) {
-                log.error "Context failed in ${l.class.name} lifecycle. Allowing Tomcat to shutdown."
-                output.output 'error.tomcat.context'
-                server.stopAwait()
-            }
             break
         }
     }
