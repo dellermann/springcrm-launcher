@@ -1,2 +1,3 @@
-caldecott.log
-target
+/.gradle
+/build
+/target
