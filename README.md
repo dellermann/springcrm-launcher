@@ -17,7 +17,12 @@ Furthermore, you need 1 GB of free RAM to start Tomcat and SpringCRM.
 
 To start SpringCRM launcher execute the following command:
 
-  java -jar springcrm-launcher-1.0.0-embedded.jar *[options]*
+```shell
+java -jar springcrm-standalone-1.5.0.jar [options]
+```
+
+where you must replace _1.5.0_ by the version of the application and
+_`[options]`_ by any of the options described under [Options](#options).
 
 
 ## Options
@@ -54,10 +59,21 @@ You may use the following options, each in the form ``key=value``:
   to the system temp directory.
 
 
+## Build
+
+The launcher uses [Gradle][] to build.  In order to build the standalone
+application launcher, you have to perform the following steps:
+
+1. Ensure the SpringCRM project is in folder `../springcrm`.
+2. Build SpringCRM using `grails -Dgrails.env=standalone war` so the produced
+   WAR file will be produced in `../springcrm/target/springcrm.war`.
+3. Run `gradle build` to build the launcher.
+4. You find the executable JAR file in `build/libs`.
+
 ## Licenses
 
 SpringCRM and the SpringCRM launcher is licensed under [GPLv3][GPL-3].  The
-launcher code is based on the [Grails Standalone Plugin][GRAILS-STANDALONE]
+launcher code is based on the [Grails Standalone Plugin][Grails-Standalone]
 written by Burt Beckwith, licensed under [Apache 2 license][APACHE-2].
 
 The icons in the launcher are from the Krasimir Stefanov, licensed under GPL.
@@ -65,5 +81,7 @@ The icons in the launcher are from the Krasimir Stefanov, licensed under GPL.
 The project uses Groovy, which is licensed under [Apache 2 license][APACHE-2].
 
 [GPL-3]: http://www.gnu.org/licenses/gpl.txt
-[GRAILS-STANDALONE]: http://grails.org/plugin/standalone
+[Gradle]: http://www.gradle.org
+[Grails-Standalone]: http://grails.org/plugin/standalone
 [APACHE-2]: http://www.apache.org/licenses/LICENSE-2.0.html
+
