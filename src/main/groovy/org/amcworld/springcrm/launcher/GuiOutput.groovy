@@ -1,7 +1,7 @@
 /*
  * GuiOutput.groovy
  *
- * Copyright (c) 2011-2013, Daniel Ellermann
+ * Copyright (c) 2011-2014, Daniel Ellermann
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 package org.amcworld.springcrm.launcher
 
 import groovy.util.logging.Log4j
+import java.text.MessageFormat
 import javax.swing.JProgressBar
 import javax.swing.JTextArea
 
@@ -30,7 +31,8 @@ import javax.swing.JTextArea
  * and progress bar of the main window.
  *
  * @author  Daniel Ellermann
- * @version 1.0
+ * @version 1.5
+ * @since   1.0
  */
 @Log4j
 class GuiOutput {
@@ -57,8 +59,10 @@ class GuiOutput {
      *
      * @param key   the given l10n key
      */
-    void output(String key) {
-        outputArea.append resourceBundle.getString(key) + '\n'
+    void output(String key, Object... arguments) {
+        String s = resourceBundle.getString(key)
+        s = MessageFormat.format(s, arguments)
+        outputArea.append s + '\n'
     }
 
     /**

@@ -1,7 +1,7 @@
 /*
  * Launcher.groovy
  *
- * Copyright (c) 2011-2013, Daniel Ellermann
+ * Copyright (c) 2011-2014, Daniel Ellermann
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ package org.amcworld.springcrm.launcher
 
 import static javax.swing.ScrollPaneConstants.*
 import static javax.swing.SwingConstants.*
+
 import groovy.swing.SwingBuilder
 import groovy.util.logging.Log4j
 import java.awt.BorderLayout as BL
@@ -38,7 +39,8 @@ import javax.swing.JTextArea
  * SpringCRM.
  *
  * @author  Daniel Ellermann
- * @version 1.0
+ * @version 1.5
+ * @since   1.0
  */
 @Log4j
 class Launcher implements GuiControls {
@@ -251,7 +253,7 @@ class Launcher implements GuiControls {
     protected void browseTo(String url) {
         def desktop = Desktop.desktop
         if (!desktop.isSupported(Desktop.Action.BROWSE)) {
-            output.output 'error.cannotLaunchBrowser'
+            output.output 'error.cannotLaunchBrowser', url
             return
         }
 

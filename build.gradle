@@ -18,9 +18,12 @@
  */
 
 
+import org.apache.tools.ant.filters.ReplaceTokens
+
+
 // build script properties
 ext {
-    groovyVersion = '2.3.6'
+    groovyVersion = '2.3.7'
     tomcatVersion = '7.0.54'
     springcrmDir = '../springcrm'
     springcrmWar = "${springcrmDir}/target/springcrm.war"
@@ -50,7 +53,7 @@ dependencies {
 // task type configurations
 jar {
     manifest {
-        attributes 'Implementation-Title': 'SpringCRM standalone',  
+        attributes 'Implementation-Title': 'SpringCRM standalone',
             'Implementation-Version': version,
             'Main-Class': 'org.amcworld.springcrm.launcher.Launcher'
     }
@@ -60,6 +63,14 @@ jar {
     }
     from(springcrmWar) { rename { 'embedded.war' } }
 }
+processResources.from(sourceSets.main.resources, {
+        exclude '**/*.properties'
+    }).from(sourceSets.main.resources, {
+        include '**/*.properties'
+        filter ReplaceTokens, tokens: [
+            version: version, copyrightYear: new Date().format('yyyy')
+        ]
+    })
 
 // auxiliary functions
 String getAppVersion() {
