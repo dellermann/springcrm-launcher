@@ -74,6 +74,9 @@ processResources.from(sourceSets.main.resources, {
             version: version, copyrightYear: new Date().format('yyyy')
         ]
     })
+uploadArchives {
+    uploadDescriptor = false
+}
 
 // publishing
 artifacts {
