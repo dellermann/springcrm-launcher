@@ -33,6 +33,7 @@ ext {
 // plugins
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
+loadAmcDefault()
 
 // pre-defined properties
 version = getAppVersion()
@@ -74,6 +75,11 @@ processResources.from(sourceSets.main.resources, {
         ]
     })
 
+// publishing
+artifacts {
+    archives jar
+}
+
 // auxiliary functions
 String getAppVersion() {
     def stream
@@ -84,6 +90,13 @@ String getAppVersion() {
         props.get('app.version')
     } finally {
         stream?.close()
+    }
+}
+
+void loadAmcDefault() {
+    File f = project.file('../amc-default.gradle')
+    if (f.exists()) {
+        project.apply from: f
     }
 }
 
