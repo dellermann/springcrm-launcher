@@ -1,7 +1,7 @@
 /*
  * TomcatLifecycleListener.groovy
  *
- * Copyright (c) 2011-2013, Daniel Ellermann
+ * Copyright (c) 2011-2014, Daniel Ellermann
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,8 @@
 package org.amcworld.springcrm.launcher
 
 import static org.apache.catalina.Lifecycle.*
-import groovy.util.logging.Log4j
+
+import groovy.util.logging.Log4j2
 import org.apache.catalina.Lifecycle
 import org.apache.catalina.LifecycleEvent
 import org.apache.catalina.LifecycleListener
@@ -37,9 +38,10 @@ import org.apache.catalina.startup.Tomcat
  * enabling or disabling buttons and menu items, printing output messages etc.
  *
  * @author  Daniel Ellermann
- * @version 1.0
+ * @version 1.5
+ * @since   1.0
  */
-@Log4j
+@Log4j2
 class TomcatLifecycleListener implements LifecycleListener {
 
     //-- Instance variables ---------------------

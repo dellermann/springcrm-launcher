@@ -1,7 +1,7 @@
 /*
  * Arguments.groovy
  *
- * Copyright (c) 2011-${year}, Daniel Ellermann
+ * Copyright (c) 2011-2014, Daniel Ellermann
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 package org.amcworld.springcrm.launcher
 
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 
 
 /**
@@ -27,9 +28,10 @@ import groovy.util.logging.Log4j
  * arguments.
  *
  * @author  Daniel Ellermann
- * @version 1.0
+ * @version 1.5
+ * @since   1.0
  */
-@Log4j
+@Log4j2
 class Arguments {
 
     //-- Constants ------------------------------

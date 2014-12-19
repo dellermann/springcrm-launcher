@@ -20,7 +20,7 @@
 
 package org.amcworld.springcrm.launcher
 
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 import java.text.MessageFormat
 import javax.swing.JProgressBar
 import javax.swing.JTextArea
@@ -34,7 +34,7 @@ import javax.swing.JTextArea
  * @version 1.5
  * @since   1.0
  */
-@Log4j
+@Log4j2
 class GuiOutput {
 
     //-- Instance variables ---------------------

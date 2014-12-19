@@ -1,7 +1,7 @@
 /*
  * Extractor.groovy
  *
- * Copyright (c) 2011-2013, Daniel Ellermann
+ * Copyright (c) 2011-2014, Daniel Ellermann
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 package org.amcworld.springcrm.launcher
 
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
@@ -30,9 +30,10 @@ import java.util.zip.ZipFile
  * a temporary folder.
  *
  * @author  Daniel Ellermann
- * @version 1.0
+ * @version 1.5
+ * @since   1.0
  */
-@Log4j
+@Log4j2
 class Extractor {
 
     //-- Instance variables ---------------------

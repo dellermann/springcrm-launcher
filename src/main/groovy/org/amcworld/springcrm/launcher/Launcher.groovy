@@ -24,7 +24,7 @@ import static javax.swing.ScrollPaneConstants.*
 import static javax.swing.SwingConstants.*
 
 import groovy.swing.SwingBuilder
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 import java.awt.BorderLayout as BL
 import java.awt.Desktop
 import javax.swing.JButton
@@ -42,7 +42,7 @@ import javax.swing.JTextArea
  * @version 1.5
  * @since   1.0
  */
-@Log4j
+@Log4j2
 class Launcher implements GuiControls {
 
     //-- Instance variables ---------------------

@@ -1,7 +1,7 @@
 /*
  * TomcatLauncher.groovy
  *
- * Copyright (c) 2011-2013, Daniel Ellermann
+ * Copyright (c) 2011-2014, Daniel Ellermann
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 
 package org.amcworld.springcrm.launcher
 
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 import org.apache.catalina.Context
 import org.apache.catalina.LifecycleException
 import org.apache.catalina.connector.Connector
@@ -33,9 +33,10 @@ import org.apache.coyote.http11.Http11NioProtocol
  * methods to start and stop a Tomcat instance.
  *
  * @author  Daniel Ellermann
- * @version 1.0
+ * @version 1.5
+ * @since   1.0
  */
-@Log4j
+@Log4j2
 class TomcatLauncher {
 
     //-- Instance variables ---------------------
