@@ -19,22 +19,24 @@
 
 
 import org.apache.tools.ant.filters.ReplaceTokens
+import org.gradle.api.JavaVersion
 
 
 // build script properties
 ext {
-    groovyVersion = '2.3.7'
+    groovyVersion = '2.3.6'
     tomcatVersion = '7.0.54'
     springcrmDir = '../springcrm'
     springcrmWar = "${springcrmDir}/target/springcrm.war"
 }
 
-// pre-defined properties
-version = getAppVersion()
-
 // plugins
 apply plugin: 'eclipse'
 apply plugin: 'groovy'
+
+// pre-defined properties
+version = getAppVersion()
+targetCompatibility = JavaVersion.VERSION_1_6
 
 // repositories
 repositories {
