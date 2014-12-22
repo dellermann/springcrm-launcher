@@ -27,7 +27,6 @@ ext {
     groovyVersion = '2.3.6'
     tomcatVersion = '7.0.54'
     springcrmDir = '../springcrm'
-    springcrmWar = "${springcrmDir}/target/springcrm.war"
 }
 
 // plugins
@@ -38,6 +37,7 @@ loadAmcDefault()
 // pre-defined properties
 version = getAppVersion()
 targetCompatibility = JavaVersion.VERSION_1_6
+ext.springcrmWar = "${ext.springcrmDir}/target/springcrm-${version}.war" 
 
 // repositories
 repositories {
