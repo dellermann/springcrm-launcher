@@ -1,7 +1,7 @@
 /*
  * build.gradle
  *
- * Copyright (c) 2011-2014, Daniel Ellermann
+ * Copyright (c) 2011-2015, Daniel Ellermann
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ loadAmcDefault()
 // pre-defined properties
 version = getAppVersion()
 targetCompatibility = JavaVersion.VERSION_1_6
-ext.springcrmWar = "${ext.springcrmDir}/target/springcrm-${version}.war" 
+ext.springcrmWar = "${ext.springcrmDir}/target/springcrm-${version}.war"
 
 // repositories
 repositories {
@@ -51,6 +51,24 @@ dependencies {
     compile "org.apache.tomcat:tomcat-coyote:${tomcatVersion}"
     compile "org.apache.tomcat:tomcat-servlet-api:${tomcatVersion}"
     compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
+}
+
+// task definitions
+task createBatConfig {
+    description 'Creates a Window batch file containing configurations.'
+
+    doLast {
+        def config = """\
+set APP_VERSION=${version}
+set PRODUCT_GUID=${UUID.randomUUID()}
+""".replaceAll '\n', '\r\n'
+
+        uploadArchives.repositories.each {
+            it.dirs.each {
+                file(new File(it, 'config.bat')).write config
+            }
+        }
+    }
 }
 
 // task type configurations
@@ -75,6 +93,7 @@ processResources.from(sourceSets.main.resources, {
         ]
     })
 uploadArchives {
+    dependsOn createBatConfig
     uploadDescriptor = false
 }
 
