@@ -22,6 +22,11 @@ import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.JavaVersion
 
 
+// plugins
+plugins {
+    id "edu.sc.seis.macAppBundle" version "2.1.5"
+}
+
 // build script properties
 ext {
     groovyVersion = '2.4.4'
@@ -97,6 +102,25 @@ uploadArchives {
     uploadDescriptor = false
 }
 
+// Mac package generation
+macAppBundle {
+    appName = "SpringCRM"
+    volumeName = "springcrm-${version}"
+    dmgName = "springcrm-${version}"
+    mainClassName = 'org.amcworld.springcrm.launcher.Launcher'
+    bundleJRE = true
+    javaProperties.put 'apple.laf.useScreenMenuBar', 'true'
+    javaProperties.put 'apple.awt.brushMetalLook', 'true'
+    backgroundImage = 'background.png'
+    backgroundImageWidth = 600
+    backgroundImageHeight = 400
+    icon = 'springcrm.icns'
+    appIconX = 124
+    appIconY = 192
+    appFolderX = 297
+    appFolderY = 192
+}
+
 // publishing
 artifacts {
     archives jar
@@ -121,6 +145,3 @@ void loadAmcDefault() {
         project.apply from: f
     }
 }
-
-// vim:set ft=groovy:
-
